@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explora los departamentos de Colombia usando datos de API Colombia.">
+  <title>Colombia Explora | Departamentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/departamentos.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Colombia Explora, inicio">
+      <span class="brand-mark">CO</span>
+      <span>COLOMBIA<span class="brand-light">EXPLORA</span></span>
+    </a>
+    <span class="header-tag">Portal informativo</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> DESCUBRE NUESTRO PAÍS</p>
+        <h1>Colombia es más<br><span>que un lugar.</span></h1>
+        <p class="hero-description">Un recorrido por la diversidad de sus departamentos, sus regiones y todo lo que hace único a nuestro territorio.</p>
+        <a class="hero-link" href="#explorador">Explorar departamentos <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="mountain mountain-back"></div>
+        <div class="mountain mountain-front"></div>
+        <div class="art-label">COLOMBIA<br><strong>32 DEPARTAMENTOS</strong></div>
+      </div>
+    </section>
+
+    <section class="explorer-section" id="explorador">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow eyebrow-dark">NUESTRO TERRITORIO</p>
+          <h2>Explorador de departamentos</h2>
+          <p class="section-description">Consulta información de cada departamento obtenida directamente desde la API de Colombia.</p>
+        </div>
+        <div class="total-box"><strong id="total-departamentos">—</strong><span>departamentos</span></div>
+      </div>
+
+      <div class="toolbar">
+        <label class="search-box" for="buscador">
+          <span aria-hidden="true">⌕</span>
+          <input id="buscador" type="search" placeholder="Buscar un departamento..." autocomplete="off">
+        </label>
+        <label class="filter-box" for="filtro-region">
+          <span>Región</span>
+          <select id="filtro-region">
+            <option value="todas">Todas las regiones</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="region-summary" id="resumen-regiones" aria-live="polite"></div>
+
+      <p class="status-message" id="estado-carga" role="status">Cargando departamentos...</p>
+      <div class="department-grid" id="lista-departamentos" aria-live="polite"></div>
+      <p class="empty-message hidden" id="sin-resultados">No se encontraron departamentos con esos filtros.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>COLOMBIA EXPLORA</span>
+    <span>Datos proporcionados por <a href="https://api-colombia.com/" target="_blank" rel="noopener noreferrer">API Colombia</a></span>
+  </footer>
+</body>
+</html>

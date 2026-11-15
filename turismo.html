@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Descubre 20 atractivos turísticos de Colombia con información obtenida desde API Colombia.">
+  <title>Colombia Explora | Guía turística</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/turismo.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Colombia Explora, inicio">
+      <span class="brand-mark">CO</span>
+      <span>COLOMBIA<span class="brand-light">EXPLORA</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a class="nav-link" href="index.html">Departamentos</a>
+      <a class="nav-link active" href="turismo.html" aria-current="page">Guía turística</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="tourism-hero">
+      <div class="tourism-hero-content">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> RINCONES POR DESCUBRIR</p>
+        <h1>Colombia te<br><span>espera.</span></h1>
+        <p class="hero-description">Desde ciudades llenas de historia hasta paisajes naturales inolvidables: conoce algunos de los atractivos que hacen especial a nuestro país.</p>
+        <a class="hero-link" href="#atractivos">Ver destinos <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="tourism-hero-image" role="img" aria-label="Calle colorida del centro histórico de Cartagena"></div>
+    </section>
+
+    <section class="explorer-section" id="atractivos">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow eyebrow-dark">EXPERIENCIAS COLOMBIANAS</p>
+          <h2>Guía turística</h2>
+          <p class="section-description">Explora los primeros 20 atractivos turísticos registrados en API Colombia.</p>
+        </div>
+        <div class="total-box"><strong id="total-atractivos">—</strong><span>destinos</span></div>
+      </div>
+
+      <label class="search-box tourism-search" for="buscador-turismo">
+        <span aria-hidden="true">⌕</span>
+        <input id="buscador-turismo" type="search" placeholder="Buscar por atractivo, ciudad o departamento..." autocomplete="off">
+      </label>
+
+      <p class="status-message" id="estado-turismo" role="status">Cargando atractivos turísticos...</p>
+      <div class="tourism-grid" id="lista-atractivos" aria-live="polite"></div>
+      <p class="empty-message hidden" id="sin-atractivos">No se encontraron destinos con esa búsqueda.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>COLOMBIA EXPLORA</span>
+    <span><a href="index.html">Volver al explorador de departamentos</a> · Datos: <a href="https://api-colombia.com/" target="_blank" rel="noopener noreferrer">API Colombia</a></span>
+  </footer>
+</body>
+</html>

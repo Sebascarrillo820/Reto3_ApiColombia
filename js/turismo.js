@@ -1,162 +1,321 @@
-const API_TURISMO = 'https://api-colombia.com/api/v1/TouristicAttraction';
-const API_DEPARTAMENTOS = 'https://api-colombia.com/api/v1/Department';
-const IMAGEN_RESPALDO = 'https://images.unsplash.com/photo-1729866515900-513ec1b967e6?w=900&auto=format&fit=crop&q=80';
 
-const listaAtractivos = document.querySelector('#lista-atractivos');
-const estadoTurismo = document.querySelector('#estado-turismo');
-const totalAtractivos = document.querySelector('#total-atractivos');
-const buscadorTurismo = document.querySelector('#buscador-turismo');
-const sinAtractivos = document.querySelector('#sin-atractivos');
+// =============================================
+// GUÍA TURÍSTICA DE COLOMBIA
+// Consumo de API con Fetch
+// =============================================
 
-let atractivos = [];
-let departamentosPorId = new Map();
+// Dirección de la API
+const API_TURISMO =
+    "https://api-colombia.com/api/v1/TouristicAttraction";
 
-// Devuelve un texto legible cuando la API no incluye un dato.
-function textoSeguro(valor, alternativo = 'Información no disponible') {
-  return valor && String(valor).trim() ? String(valor) : alternativo;
-}
+// Elementos del HTML
+const contenedorTurismo =
+    document.getElementById("contenedorTurismo");
 
-// Obtiene la primera imagen disponible del atractivo.
-function obtenerImagen(atractivo) {
-  if (Array.isArray(atractivo.images) && atractivo.images.length > 0) {
-    return atractivo.images[0];
-  }
-  if (typeof atractivo.image === 'string' && atractivo.image.trim()) {
-    return atractivo.image;
-  }
-  return IMAGEN_RESPALDO;
-}
+const estadoTurismo =
+    document.getElementById("estadoTurismo");
 
-// Crea cada tarjeta de manera dinámica usando elementos del DOM.
-function crearTarjetaTuristica(atractivo, indice) {
-  const tarjeta = document.createElement('article');
-  tarjeta.className = 'tourism-card';
+const buscadorTurismo =
+    document.getElementById("buscadorTurismo");
 
-  const contenedorImagen = document.createElement('div');
-  contenedorImagen.className = 'tourism-card-image';
+const contadorTurismo =
+    document.getElementById("contadorTurismo");
 
-  const imagen = document.createElement('img');
-  imagen.src = obtenerImagen(atractivo);
-  imagen.alt = `Imagen de ${textoSeguro(atractivo.name, 'atractivo turístico de Colombia')}`;
-  imagen.loading = 'lazy';
+// Almacenará los destinos recibidos de la API
+let destinosTuristicos = [];
 
-  // Si la imagen de la API falla, se reemplaza por una imagen de respaldo de Cartagena.
-  imagen.addEventListener('error', () => {
-    if (!imagen.dataset.fallback) {
-      imagen.dataset.fallback = 'true';
-      imagen.src = IMAGEN_RESPALDO;
-    } else {
-      imagen.classList.add('image-unavailable');
-      contenedorImagen.classList.add('image-fallback');
-      contenedorImagen.textContent = 'COLOMBIA';
+
+// =============================================
+// OBTENER INFORMACIÓN DE LA API
+// =============================================
+
+async function cargarDestinos() {
+
+    try {
+
+        estadoTurismo.textContent =
+            "Cargando destinos turísticos...";
+
+        estadoTurismo.classList.remove("error");
+
+        const respuesta = await fetch(API_TURISMO);
+
+        // Comprobar si la respuesta fue correcta
+        if (!respuesta.ok) {
+            throw new Error(
+                "No fue posible obtener los destinos turísticos."
+            );
+        }
+
+        const datos = await respuesta.json();
+
+        // Comprobar que la respuesta tenga información
+        if (!Array.isArray(datos)) {
+            throw new Error(
+                "La información recibida de la API no tiene el formato esperado."
+            );
+        }
+
+        // Guardar los primeros 20 destinos
+        destinosTuristicos = datos.slice(0, 20);
+
+        estadoTurismo.textContent = "";
+
+        // Mostrar los destinos
+        mostrarDestinos(destinosTuristicos);
+
+    } catch (error) {
+
+        console.error("Error al cargar el turismo:", error);
+
+        estadoTurismo.textContent =
+            "No se pudieron cargar los destinos turísticos. " +
+            "Comprueba tu conexión a internet e inténtalo nuevamente.";
+
+        estadoTurismo.classList.add("error");
+
+        contadorTurismo.textContent =
+            "No hay destinos disponibles.";
+
     }
-  });
-
-  contenedorImagen.append(imagen);
-
-  const contenido = document.createElement('div');
-  contenido.className = 'tourism-card-content';
-
-  const numero = document.createElement('span');
-  numero.className = 'tourism-number';
-  numero.textContent = `DESTINO ${String(indice + 1).padStart(2, '0')}`;
-
-  const titulo = document.createElement('h3');
-  titulo.textContent = textoSeguro(atractivo.name, 'Atractivo sin nombre');
-
-  const ciudad = atractivo.city || {};
-  const nombreCiudad = textoSeguro(ciudad.name, 'Ciudad no disponible');
-  const departamentoRelacionado = departamentosPorId.get(Number(ciudad.departmentId));
-  const nombreDepartamento = textoSeguro(
-    ciudad.department?.name || ciudad.departmentName || atractivo.department?.name || departamentoRelacionado?.name,
-    'Departamento no disponible'
-  );
-
-  const ubicacion = document.createElement('p');
-  ubicacion.className = 'tourism-location';
-  ubicacion.textContent = `${nombreCiudad} · ${nombreDepartamento}`;
-
-  const descripcion = document.createElement('p');
-  descripcion.className = 'tourism-description';
-  descripcion.textContent = textoSeguro(
-    atractivo.description,
-    'Este atractivo no tiene una descripción registrada.'
-  );
-
-  contenido.append(numero, titulo, ubicacion, descripcion);
-  tarjeta.append(contenedorImagen, contenido);
-  return tarjeta;
 }
 
-// Muestra únicamente los primeros 20 elementos recibidos desde la API.
-function mostrarAtractivos(datos) {
-  listaAtractivos.replaceChildren();
 
-  datos.forEach((atractivo, indice) => {
-    listaAtractivos.append(crearTarjetaTuristica(atractivo, indice));
-  });
+// =============================================
+// OBTENER EL NOMBRE DE LA CIUDAD
+// =============================================
 
-  sinAtractivos.classList.toggle('hidden', datos.length !== 0);
-}
+function obtenerCiudad(destino) {
 
-// Filtra los 20 destinos por nombre, ciudad o departamento.
-function filtrarAtractivos() {
-  const busqueda = buscadorTurismo.value.trim().toLocaleLowerCase('es');
-
-  const resultados = atractivos.filter(atractivo => {
-    const ciudad = atractivo.city || {};
-    const departamento = ciudad.department || atractivo.department || departamentosPorId.get(Number(ciudad.departmentId)) || {};
-    const texto = [
-      atractivo.name,
-      atractivo.description,
-      ciudad.name,
-      departamento.name,
-      ciudad.departmentName
-    ].filter(Boolean).join(' ').toLocaleLowerCase('es');
-
-    return texto.includes(busqueda);
-  });
-
-  mostrarAtractivos(resultados);
-}
-
-async function obtenerAtractivos() {
-  try {
-    estadoTurismo.classList.remove('hidden');
-    estadoTurismo.textContent = 'Cargando atractivos turísticos desde API Colombia...';
-
-    const [respuestaAtractivos, respuestaDepartamentos] = await Promise.all([
-      fetch(API_TURISMO),
-      fetch(API_DEPARTAMENTOS)
-    ]);
-
-    if (!respuestaAtractivos.ok) {
-      throw new Error(`La API de atractivos respondió con el estado ${respuestaAtractivos.status}`);
-    }
-    if (!respuestaDepartamentos.ok) {
-      throw new Error(`La API de departamentos respondió con el estado ${respuestaDepartamentos.status}`);
+    if (typeof destino.city === "string") {
+        return destino.city;
     }
 
-    const [datosAtractivos, datosDepartamentos] = await Promise.all([
-      respuestaAtractivos.json(),
-      respuestaDepartamentos.json()
-    ]);
-
-    if (!Array.isArray(datosAtractivos) || !Array.isArray(datosDepartamentos)) {
-      throw new Error('El formato de datos recibido no es el esperado.');
+    if (destino.city && typeof destino.city === "object") {
+        return destino.city.name || "No especificada";
     }
 
-    departamentosPorId = new Map(datosDepartamentos.map(departamento => [Number(departamento.id), departamento]));
-    atractivos = datosAtractivos.slice(0, 20);
-    totalAtractivos.textContent = atractivos.length;
-    mostrarAtractivos(atractivos);
-    estadoTurismo.classList.add('hidden');
-  } catch (error) {
-    console.error('Error al consultar los atractivos turísticos:', error);
-    estadoTurismo.textContent = 'No fue posible cargar los atractivos. Verifica tu conexión e inténtalo nuevamente.';
-    estadoTurismo.classList.remove('hidden');
-  }
+    return destino.cityName || "No especificada";
 }
 
-buscadorTurismo.addEventListener('input', filtrarAtractivos);
-obtenerAtractivos();
+
+// =============================================
+// OBTENER EL NOMBRE DEL DEPARTAMENTO
+// =============================================
+
+function obtenerDepartamento(destino) {
+
+    if (typeof destino.department === "string") {
+        return destino.department;
+    }
+
+    if (
+        destino.department &&
+        typeof destino.department === "object"
+    ) {
+        return destino.department.name || "No especificado";
+    }
+
+    return destino.departmentName || "No especificado";
+}
+
+
+// =============================================
+// OBTENER LA DESCRIPCIÓN
+// =============================================
+
+function obtenerDescripcion(destino) {
+
+    return destino.description ||
+        destino.shortDescription ||
+        "No hay una descripción disponible para este destino.";
+}
+
+
+// =============================================
+// OBTENER UNA IMAGEN
+// =============================================
+
+function obtenerImagen(destino) {
+
+    let imagen = null;
+
+    // La API puede entregar imágenes en diferentes formatos
+    if (typeof destino.images === "string") {
+
+        imagen = destino.images;
+
+    } else if (
+        Array.isArray(destino.images) &&
+        destino.images.length > 0
+    ) {
+
+        const primeraImagen = destino.images[0];
+
+        if (typeof primeraImagen === "string") {
+            imagen = primeraImagen;
+        } else if (primeraImagen && typeof primeraImagen === "object") {
+            imagen =
+                primeraImagen.url ||
+                primeraImagen.imageUrl ||
+                primeraImagen.src;
+        }
+
+    }
+
+    // Otras propiedades posibles
+    imagen =
+        imagen ||
+        destino.image ||
+        destino.imageUrl ||
+        destino.photo;
+
+    // Evitar direcciones de imagen no seguras
+    if (
+        typeof imagen === "string" &&
+        /^https?:\/\//i.test(imagen)
+    ) {
+        return imagen;
+    }
+
+    return "https://placehold.co/600x400?text=Destino+Turistico";
+}
+
+
+// =============================================
+// CREAR UNA TARJETA
+// =============================================
+
+function crearTarjeta(destino) {
+
+    // Crear los elementos HTML
+    const tarjeta = document.createElement("article");
+    tarjeta.classList.add("turismo-card");
+
+    const imagen = document.createElement("img");
+
+    imagen.src = obtenerImagen(destino);
+    imagen.alt = destino.name || "Destino turístico de Colombia";
+    imagen.loading = "lazy";
+
+    // Imagen alternativa si la original falla
+    imagen.onerror = function () {
+        this.onerror = null;
+        this.src =
+            "https://placehold.co/600x400?text=Imagen+no+disponible";
+    };
+
+    const contenido = document.createElement("div");
+    contenido.classList.add("turismo-card-content");
+
+    const titulo = document.createElement("h2");
+    titulo.textContent =
+        destino.name || "Destino turístico sin nombre";
+
+    const ubicacion = document.createElement("p");
+    ubicacion.classList.add("ubicacion");
+
+    ubicacion.textContent =
+        "📍 " + obtenerCiudad(destino) +
+        " - " + obtenerDepartamento(destino);
+
+    const descripcion = document.createElement("p");
+    descripcion.classList.add("descripcion");
+
+    descripcion.textContent =
+        obtenerDescripcion(destino);
+
+    // Organizar los elementos
+    contenido.appendChild(titulo);
+    contenido.appendChild(ubicacion);
+    contenido.appendChild(descripcion);
+
+    tarjeta.appendChild(imagen);
+    tarjeta.appendChild(contenido);
+
+    return tarjeta;
+}
+
+
+// =============================================
+// MOSTRAR LOS DESTINOS EN EL HTML
+// =============================================
+
+function mostrarDestinos(lista) {
+
+    // Limpiar las tarjetas anteriores
+    contenedorTurismo.innerHTML = "";
+
+    if (lista.length === 0) {
+
+        estadoTurismo.textContent =
+            "No se encontraron destinos turísticos.";
+
+        contadorTurismo.textContent =
+            "0 destinos encontrados.";
+
+        return;
+    }
+
+    estadoTurismo.textContent = "";
+
+    contadorTurismo.textContent =
+        `Mostrando ${lista.length} de ${destinosTuristicos.length} destinos turísticos.`;
+
+    // Crear y agregar las tarjetas
+    lista.forEach(function (destino) {
+
+        const tarjeta = crearTarjeta(destino);
+
+        contenedorTurismo.appendChild(tarjeta);
+
+    });
+
+}
+
+
+// =============================================
+// BUSCADOR DE DESTINOS TURÍSTICOS
+// =============================================
+
+buscadorTurismo.addEventListener("input", function () {
+
+    const texto = this.value
+        .toLowerCase()
+        .trim();
+
+    // Filtrar por nombre, ciudad o departamento
+    const resultados = destinosTuristicos.filter(
+        function (destino) {
+
+            const nombre =
+                destino.name || "";
+
+            const ciudad =
+                obtenerCiudad(destino);
+
+            const departamento =
+                obtenerDepartamento(destino);
+
+            const descripcion =
+                obtenerDescripcion(destino);
+
+            const informacion =
+                `${nombre} ${ciudad} ${departamento} ${descripcion}`
+                    .toLowerCase();
+
+            return informacion.includes(texto);
+
+        }
+    );
+
+    mostrarDestinos(resultados);
+
+});
+
+
+// =============================================
+// INICIAR LA APLICACIÓN
+// =============================================
+
+cargarDestinos();

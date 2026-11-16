@@ -1,63 +1,256 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Descubre 20 atractivos turísticos de Colombia con información obtenida desde API Colombia.">
-  <title>Colombia Explora | Guía turística</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-  <script src="js/turismo.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Guía Turística de Colombia</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Estilos específicos de la página turística -->
+    <style>
+        .tourism-page {
+            max-width: 1200px;
+            width: 92%;
+            margin: 0 auto;
+            padding: 25px 0 50px;
+            color: #263238;
+        }
+
+        .tourism-header {
+            text-align: center;
+            padding: 35px 20px;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #075e46, #15966d);
+            border-radius: 16px;
+            color: white;
+        }
+
+        .tourism-header h1 {
+            color: white;
+            font-size: clamp(1.8rem, 5vw, 2.7rem);
+            margin: 0 0 12px;
+        }
+
+        .tourism-header p {
+            color: white;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .tourism-nav {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 30px;
+        }
+
+        .tourism-nav a {
+            display: inline-block;
+            background: #075e46;
+            color: white;
+            text-decoration: none;
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .tourism-nav a:hover {
+            background: #15966d;
+        }
+
+        .tourism-controls {
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .tourism-controls label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #buscadorTurismo {
+            width: 100%;
+            max-width: 550px;
+            padding: 13px 15px;
+            border: 1px solid #cbd5d1;
+            border-radius: 9px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        #buscadorTurismo:focus {
+            outline: 2px solid #15966d;
+            border-color: #15966d;
+        }
+
+        #contadorTurismo {
+            text-align: center;
+            margin: 18px 0;
+            color: #455a50;
+            font-weight: bold;
+        }
+
+        #estadoTurismo {
+            text-align: center;
+            padding: 25px 15px;
+            color: #455a50;
+            font-size: 1rem;
+        }
+
+        #estadoTurismo.error {
+            color: #b42318;
+        }
+
+        #contenedorTurismo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 25px;
+        }
+
+        .turismo-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #e0e7e3;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .turismo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.13);
+        }
+
+        .turismo-card img {
+            display: block;
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            background: #e5eee9;
+        }
+
+        .turismo-card-content {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .turismo-card h2 {
+            color: #075e46;
+            font-size: 1.2rem;
+            line-height: 1.4;
+            margin: 0 0 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .turismo-card p {
+            color: #45545c;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 7px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .turismo-card .ubicacion {
+            color: #087653;
+            font-weight: bold;
+        }
+
+        .turismo-card .descripcion {
+            margin-top: 10px;
+        }
+
+        .tourism-footer {
+            text-align: center;
+            padding: 25px 10px;
+            margin-top: 35px;
+            color: #65736c;
+            border-top: 1px solid #e0e7e3;
+        }
+
+        @media (max-width: 600px) {
+            .tourism-page {
+                width: 94%;
+                padding-top: 15px;
+            }
+
+            .tourism-header {
+                padding: 28px 15px;
+            }
+
+            #contenedorTurismo {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .turismo-card img {
+                height: 200px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Colombia Explora, inicio">
-      <span class="brand-mark">CO</span>
-      <span>COLOMBIA<span class="brand-light">EXPLORA</span></span>
-    </a>
-    <nav class="main-nav" aria-label="Navegación principal">
-      <a class="nav-link" href="index.html">Departamentos</a>
-      <a class="nav-link active" href="turismo.html" aria-current="page">Guía turística</a>
-    </nav>
-  </header>
 
-  <main>
-    <section class="tourism-hero">
-      <div class="tourism-hero-content">
-        <p class="eyebrow"><span class="eyebrow-dot"></span> RINCONES POR DESCUBRIR</p>
-        <h1>Colombia te<br><span>espera.</span></h1>
-        <p class="hero-description">Desde ciudades llenas de historia hasta paisajes naturales inolvidables: conoce algunos de los atractivos que hacen especial a nuestro país.</p>
-        <a class="hero-link" href="#atractivos">Ver destinos <span aria-hidden="true">↓</span></a>
-      </div>
-      <div class="tourism-hero-image" role="img" aria-label="Calle colorida del centro histórico de Cartagena"></div>
-    </section>
+    <main class="tourism-page">
 
-    <section class="explorer-section" id="atractivos">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow eyebrow-dark">EXPERIENCIAS COLOMBIANAS</p>
-          <h2>Guía turística</h2>
-          <p class="section-description">Explora los primeros 20 atractivos turísticos registrados en API Colombia.</p>
+        <header class="tourism-header">
+            <h1>Guía Turística de Colombia 🇨🇴</h1>
+            <p>
+                Descubre algunos de los lugares turísticos más interesantes
+                de nuestro país.
+            </p>
+        </header>
+
+        <nav class="tourism-nav">
+            <a href="index.html">← Volver al explorador de departamentos</a>
+        </nav>
+
+        <section class="tourism-controls">
+            <label for="buscadorTurismo">
+                Busca un destino turístico
+            </label>
+
+            <input
+                type="search"
+                id="buscadorTurismo"
+                placeholder="Ejemplo: Cartagena, Tayrona, Bogotá..."
+                autocomplete="off"
+            >
+        </section>
+
+        <p id="contadorTurismo">
+            Preparando destinos turísticos...
+        </p>
+
+        <div id="estadoTurismo" role="status" aria-live="polite">
+            Cargando lugares turísticos...
         </div>
-        <div class="total-box"><strong id="total-atractivos">—</strong><span>destinos</span></div>
-      </div>
 
-      <label class="search-box tourism-search" for="buscador-turismo">
-        <span aria-hidden="true">⌕</span>
-        <input id="buscador-turismo" type="search" placeholder="Buscar por atractivo, ciudad o departamento..." autocomplete="off">
-      </label>
+        <section
+            id="contenedorTurismo"
+            aria-label="Lista de destinos turísticos"
+        >
+        </section>
 
-      <p class="status-message" id="estado-turismo" role="status">Cargando atractivos turísticos...</p>
-      <div class="tourism-grid" id="lista-atractivos" aria-live="polite"></div>
-      <p class="empty-message hidden" id="sin-atractivos">No se encontraron destinos con esa búsqueda.</p>
-    </section>
-  </main>
+        <footer class="tourism-footer">
+            <p>Mini Portal de Colombia | Guía Turística</p>
+            <p>Información obtenida mediante la API de Colombia.</p>
+        </footer>
 
-  <footer class="site-footer">
-    <span>COLOMBIA EXPLORA</span>
-    <span><a href="index.html">Volver al explorador de departamentos</a> · Datos: <a href="https://api-colombia.com/" target="_blank" rel="noopener noreferrer">API Colombia</a></span>
-  </footer>
+    </main>
+
+    <script src="js/turismo.js" defer></script>
+
 </body>
 </html>
